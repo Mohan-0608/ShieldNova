@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShieldNova AI – AI-Powered Cybersecurity</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════
+   TOKENS
+════════════════════════════════ */
+:root{
+  --ink:#080c14; --ink2:#0d1523; --ink3:#111c2e;
+  --surface:#131f33; --surface2:#1a2840;
+  --border:rgba(255,255,255,0.07);
+  --border-bright:rgba(0,200,255,0.35);
+  --cyan:#00c8ff; --cyan-dim:rgba(0,200,255,0.12);
+  --lime:#00e5a0; --red:#ff4466;
+  --text:#d8e8f8; --muted:#5a7a9a; --muted2:#8aa0ba; --white:#ffffff;
+  --r:6px;
+  --nav-h:64px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+body{background:var(--ink);color:var(--text);font-family:'Space Grotesk',sans-serif;overflow-x:hidden;line-height:1.6;}
+::selection{background:var(--cyan);color:var(--ink);}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-thumb{background:var(--cyan);}
+img,svg{max-width:100%;}
+button{font-family:inherit;}
+
+/* ════════════════════════════════
+   CURSOR (desktop only)
+════════════════════════════════ */
+#cur,#curR{position:fixed;pointer-events:none;z-index:9999;border-radius:50%;transform:translate(-50%,-50%);transition:width .15s,height .15s;display:none;}
+#cur{width:8px;height:8px;background:var(--cyan);}
+#curR{width:32px;height:32px;border:1.5px solid rgba(0,200,255,.5);}
+@media(pointer:fine){
+  #cur,#curR{display:block;}
+  body{cursor:none;}
+  button,a,.role-item{cursor:none;}
+}
+
+/* ════════════════════════════════
+   BG
+════════════════════════════════ */
+.bg-grid{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(0,200,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,.025) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;}
+.bg-g1{position:fixed;top:-200px;right:-100px;width:600px;height:600px;background:radial-gradient(circle,rgba(0,200,255,.06),transparent 70%);z-index:0;pointer-events:none;}
+.bg-g2{position:fixed;bottom:-150px;left:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(0,229,160,.04),transparent 70%);z-index:0;pointer-events:none;}
+
+/* ════════════════════════════════
+   NAV
+════════════════════════════════ */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--nav-h);padding:0 5%;display:flex;align-items:center;justify-content:space-between;background:rgba(8,12,20,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);transition:background .3s;}
+nav.solid{background:rgba(8,12,20,.98);}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--cyan),var(--lime));border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.logo-icon svg{width:16px;height:16px;}
+.logo-name{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--white);}
+.logo-name span{color:var(--cyan);}
+
+/* desktop nav links */
+.nav-links{display:flex;align-items:center;gap:1.8rem;list-style:none;}
+.nav-links a{color:var(--muted2);text-decoration:none;font-size:.875rem;font-weight:500;transition:color .2s;}
+.nav-links a:hover{color:var(--white);}
+.nav-right{display:flex;align-items:center;gap:.7rem;}
+.btn-ghost{background:transparent;color:var(--muted2);border:1px solid var(--border);padding:.48rem 1.1rem;border-radius:var(--r);font-size:.85rem;font-weight:500;transition:all .2s;}
+.btn-ghost:hover{border-color:var(--cyan);color:var(--cyan);}
+.btn-nav{background:var(--cyan);color:var(--ink);border:none;padding:.48rem 1.3rem;border-radius:var(--r);font-size:.85rem;font-weight:700;transition:all .2s;box-shadow:0 0 18px rgba(0,200,255,.3);}
+.btn-nav:hover{box-shadow:0 0 28px rgba(0,200,255,.6);transform:translateY(-1px);}
+
+/* hamburger */
+.ham{display:none;flex-direction:column;justify-content:center;gap:5px;width:38px;height:38px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:9px;cursor:pointer;flex-shrink:0;}
+.ham span{display:block;height:2px;background:var(--muted2);border-radius:2px;transition:all .3s;}
+.ham.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px);}
+.ham.open span:nth-child(2){opacity:0;transform:scaleX(0);}
+.ham.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px);}
+
+/* mobile drawer */
+.nav-drawer{position:fixed;top:var(--nav-h);left:0;right:0;z-index:199;background:rgba(8,12,20,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:1.5rem 5% 2rem;display:flex;flex-direction:column;gap:1rem;transform:translateY(-110%);transition:transform .35s cubic-bezier(.4,0,.2,1);pointer-events:none;}
+.nav-drawer.open{transform:translateY(0);pointer-events:all;}
+.nav-drawer a{color:var(--text);text-decoration:none;font-size:1.05rem;font-weight:600;padding:.7rem 0;border-bottom:1px solid var(--border);}
+.nav-drawer a:last-of-type{border-bottom:none;}
+.nav-drawer a:hover{color:var(--cyan);}
+.drawer-btns{display:flex;gap:.7rem;margin-top:.5rem;flex-wrap:wrap;}
+.drawer-btns button{flex:1;min-width:120px;}
+
+/* ════════════════════════════════
+   HERO
+════════════════════════════════ */
+section{position:relative;z-index:1;}
+#hero{min-height:100svh;padding:calc(var(--nav-h) + 4rem) 5% 4rem;}
+.hero-inner{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:4rem;min-height:calc(100svh - var(--nav-h) - 4rem);}
+.hero-left{max-width:580px;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:.6rem;background:rgba(0,200,255,.08);border:1px solid rgba(0,200,255,.2);padding:.35rem .9rem;border-radius:20px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--cyan);letter-spacing:.08em;margin-bottom:1.8rem;animation:fadeUp .6s ease both;}
+.eyebrow-dot{width:6px;height:6px;background:var(--cyan);border-radius:50%;flex-shrink:0;animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.hero-h1{font-family:'Syne',sans-serif;font-size:clamp(2rem,5vw,3.8rem);font-weight:800;line-height:1.08;letter-spacing:-.03em;color:var(--white);margin-bottom:1.4rem;animation:fadeUp .6s .1s ease both;}
+.hero-h1 .c{color:var(--cyan);}
+.hero-h1 .g{background:linear-gradient(90deg,var(--cyan),var(--lime));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-desc{font-size:clamp(.95rem,2vw,1.1rem);color:var(--muted2);line-height:1.75;margin-bottom:2.2rem;animation:fadeUp .6s .2s ease both;}
+.hero-btns{display:flex;gap:.85rem;flex-wrap:wrap;animation:fadeUp .6s .3s ease both;}
+.btn-primary{background:var(--cyan);color:var(--ink);border:none;padding:.85rem 2rem;border-radius:var(--r);font-size:.95rem;font-weight:700;transition:all .25s;box-shadow:0 4px 22px rgba(0,200,255,.35);}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 34px rgba(0,200,255,.55);}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border-bright);padding:.85rem 2rem;border-radius:var(--r);font-size:.95rem;font-weight:600;transition:all .25s;}
+.btn-outline:hover{background:var(--cyan-dim);border-color:var(--cyan);color:var(--white);}
+.hero-stats{display:flex;gap:2.5rem;margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);animation:fadeUp .6s .4s ease both;flex-wrap:wrap;}
+.stat-num{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--white);}
+.stat-num span{color:var(--cyan);}
+.stat-lbl{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:.1rem;}
+.hero-right{display:flex;align-items:center;justify-content:center;animation:fadeUp .7s .2s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+
+/* shield graphic */
+.shield-wrap{position:relative;width:min(400px,90vw);height:min(400px,90vw);}
+.shield-ring{position:absolute;border-radius:50%;border:1px solid;animation:spin linear infinite;}
+.ring1{inset:0;border-color:rgba(0,200,255,.15);animation-duration:25s;}
+.ring2{inset:28px;border-color:rgba(0,229,160,.1);animation-duration:18s;animation-direction:reverse;}
+.ring3{inset:56px;border-color:rgba(0,200,255,.08);animation-duration:35s;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.shield-core{position:absolute;inset:80px;background:linear-gradient(135deg,var(--ink3),var(--surface));border:1px solid rgba(0,200,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 60px rgba(0,200,255,.1),inset 0 0 40px rgba(0,200,255,.05);}
+.shield-svg{width:100px;height:100px;filter:drop-shadow(0 0 18px rgba(0,200,255,.5));}
+.threat-badge{position:absolute;background:rgba(13,21,35,.95);border:1px solid;border-radius:8px;padding:.45rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.65rem;display:flex;align-items:center;gap:.45rem;white-space:nowrap;animation:tbFloat 4s ease-in-out infinite;}
+.tb1{top:12%;right:-2%;border-color:rgba(255,68,102,.3);color:#ff4466;}
+.tb2{bottom:18%;left:-2%;border-color:rgba(0,200,255,.3);color:var(--cyan);animation-delay:1.5s;}
+.tb3{top:48%;right:-4%;border-color:rgba(0,229,160,.3);color:var(--lime);animation-delay:.8s;}
+.tb-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.tb1 .tb-dot{background:#ff4466;box-shadow:0 0 5px #ff4466;}
+.tb2 .tb-dot{background:var(--cyan);box-shadow:0 0 5px var(--cyan);}
+.tb3 .tb-dot{background:var(--lime);box-shadow:0 0 5px var(--lime);}
+@keyframes tbFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+/* ════════════════════════════════
+   TRUST STRIP
+════════════════════════════════ */
+.trust-strip{border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:1.4rem 5%;background:var(--ink2);position:relative;z-index:1;overflow:hidden;}
+.trust-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;}
+.trust-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;flex-shrink:0;}
+.trust-scroll{display:flex;align-items:center;gap:2rem;flex-wrap:wrap;}
+.trust-item{display:flex;align-items:center;gap:.45rem;font-size:.82rem;color:var(--muted2);}
+.t-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);flex-shrink:0;}
+
+/* ════════════════════════════════
+   SECTIONS SHARED
+════════════════════════════════ */
+.section-wrap{max-width:1200px;margin:0 auto;padding:5rem 5%;}
+.section-head{text-align:center;margin-bottom:3.5rem;}
+.eyebrow-tag{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--cyan);letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:.7rem;}
+.section-h2{font-family:'Syne',sans-serif;font-size:clamp(1.65rem,3.5vw,2.5rem);font-weight:800;color:var(--white);letter-spacing:-.03em;line-height:1.15;}
+.section-h2 .c{color:var(--cyan);}
+.section-sub{font-size:.95rem;color:var(--muted2);margin-top:.7rem;max-width:500px;margin-left:auto;margin-right:auto;}
+
+/* ════════════════════════════════
+   ABOUT
+════════════════════════════════ */
+#about{background:linear-gradient(180deg,transparent,rgba(0,200,255,.02),transparent);}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:4.5rem;align-items:center;max-width:1100px;margin:0 auto;}
+.about-text p{color:var(--muted2);line-height:1.8;font-size:.975rem;margin-bottom:1.1rem;}
+.founder-card{display:flex;align-items:center;gap:1.1rem;margin-top:2rem;padding:1.1rem 1.4rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;}
+.founder-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--lime));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;color:var(--ink);flex-shrink:0;}
+.founder-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.975rem;color:var(--white);}
+.founder-role{font-size:.775rem;color:var(--cyan);margin:.12rem 0;}
+.founder-quote{font-size:.8rem;color:var(--muted2);font-style:italic;}
+.about-metrics{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem;transition:border-color .3s,transform .3s;}
+.metric-card:hover{border-color:var(--border-bright);transform:translateY(-3px);}
+.metric-num{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;color:var(--white);}
+.metric-num span{color:var(--cyan);}
+.metric-label{font-size:.75rem;color:var(--muted);margin-top:.2rem;text-transform:uppercase;letter-spacing:.06em;}
+.metric-icon{font-size:1.3rem;margin-bottom:.45rem;}
+
+/* ════════════════════════════════
+   SERVICES
+════════════════════════════════ */
+#services{background:var(--ink2);}
+.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem;max-width:1100px;margin:0 auto;}
+.svc-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.7rem;transition:all .3s;position:relative;overflow:hidden;}
+.svc-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),var(--lime));transform:scaleX(0);transform-origin:left;transition:transform .3s;}
+.svc-card:hover{border-color:rgba(0,200,255,.25);transform:translateY(-4px);box-shadow:0 12px 36px rgba(0,200,255,.1);}
+.svc-card:hover::after{transform:scaleX(1);}
+.svc-icon-wrap{width:46px;height:46px;background:var(--cyan-dim);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.35rem;margin-bottom:.9rem;}
+.svc-name{font-family:'Syne',sans-serif;font-size:.975rem;font-weight:700;color:var(--white);margin-bottom:.45rem;}
+.svc-desc{font-size:.845rem;color:var(--muted2);line-height:1.65;}
+
+/* ════════════════════════════════
+   PRICING
+════════════════════════════════ */
+#pricing{background:linear-gradient(180deg,transparent,rgba(0,200,255,.02),transparent);}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;max-width:980px;margin:0 auto;}
+.price-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:2rem;position:relative;transition:all .35s;}
+.price-card:hover{transform:translateY(-6px);box-shadow:0 20px 56px rgba(0,0,0,.3);}
+.price-card.hot{border-color:var(--border-bright);box-shadow:0 0 36px rgba(0,200,255,.12);}
+.hot-tag{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,var(--cyan),var(--lime));color:var(--ink);font-size:.68rem;font-weight:700;letter-spacing:.07em;padding:.28rem .95rem;border-radius:20px;white-space:nowrap;}
+.plan-name{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--cyan);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.9rem;}
+.plan-price{font-family:'Syne',sans-serif;font-size:2.3rem;font-weight:800;color:var(--white);line-height:1;}
+.plan-price sub{font-size:1rem;font-weight:400;color:var(--muted2);}
+.plan-gst{font-size:.74rem;color:var(--muted);margin-top:.3rem;margin-bottom:1.3rem;font-family:'JetBrains Mono',monospace;}
+.plan-divider{height:1px;background:var(--border);margin-bottom:1.3rem;}
+.plan-features{list-style:none;margin-bottom:1.8rem;}
+.plan-features li{display:flex;align-items:center;gap:.6rem;padding:.42rem 0;font-size:.845rem;color:var(--muted2);border-bottom:1px solid var(--border);}
+.plan-features li:last-child{border-bottom:none;}
+.plan-features li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--cyan);flex-shrink:0;}
+.plan-btn{width:100%;padding:.8rem;border-radius:var(--r);font-family:'Space Grotesk',sans-serif;font-size:.875rem;font-weight:700;transition:all .25s;border:1px solid var(--border-bright);background:transparent;color:var(--cyan);}
+.plan-btn:hover,.price-card.hot .plan-btn{background:var(--cyan);color:var(--ink);border-color:var(--cyan);box-shadow:0 4px 18px rgba(0,200,255,.3);}
+
+/* ════════════════════════════════
+   FEATURES
+════════════════════════════════ */
+#features{background:var(--ink2);}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;max-width:1100px;margin:0 auto;}
+.feat-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem;display:flex;gap:.9rem;transition:all .3s;}
+.feat-item:hover{border-color:rgba(0,200,255,.25);transform:translateX(4px);}
+.feat-icon{font-size:1.4rem;flex-shrink:0;margin-top:.1rem;}
+.feat-name{font-family:'Syne',sans-serif;font-size:.925rem;font-weight:700;color:var(--white);margin-bottom:.3rem;}
+.feat-desc{font-size:.81rem;color:var(--muted2);line-height:1.6;}
+
+/* ════════════════════════════════
+   FAQ
+════════════════════════════════ */
+#faq{background:linear-gradient(180deg,transparent,rgba(0,229,160,.02),transparent);}
+.faq-list{max-width:660px;margin:0 auto;display:flex;flex-direction:column;gap:.55rem;}
+.faq-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .3s;}
+.faq-item.open{border-color:rgba(0,200,255,.3);}
+.faq-q{padding:1.05rem 1.3rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;cursor:pointer;font-family:'Syne',sans-serif;font-size:.875rem;font-weight:600;color:var(--text);-webkit-tap-highlight-color:transparent;}
+.faq-toggle{width:24px;height:24px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--cyan);font-size:1rem;flex-shrink:0;transition:transform .3s,background .3s;}
+.faq-item.open .faq-toggle{transform:rotate(45deg);background:var(--cyan-dim);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .4s ease;}
+.faq-item.open .faq-a{max-height:300px;}
+.faq-a p{padding:.1rem 1.3rem 1.1rem;font-size:.845rem;color:var(--muted2);line-height:1.75;}
+
+/* ════════════════════════════════
+   TESTIMONIALS
+════════════════════════════════ */
+#testimonials{background:var(--ink2);}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem;max-width:1100px;margin:0 auto;}
+.testi-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.7rem;transition:all .3s;}
+.testi-card:hover{border-color:rgba(0,200,255,.2);transform:translateY(-4px);}
+.testi-stars{display:flex;gap:2px;margin-bottom:.9rem;}
+.testi-stars span{color:var(--cyan);font-size:.82rem;}
+.testi-text{font-size:.875rem;color:var(--muted2);line-height:1.75;margin-bottom:1.3rem;font-style:italic;}
+.testi-author{display:flex;align-items:center;gap:.75rem;}
+.testi-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--lime));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;color:var(--ink);flex-shrink:0;}
+.testi-name{font-weight:700;font-size:.845rem;color:var(--white);}
+.testi-co{font-size:.745rem;color:var(--cyan);font-family:'JetBrains Mono',monospace;}
+
+/* ════════════════════════════════
+   HIRING
+════════════════════════════════ */
+#hiring{background:linear-gradient(135deg,rgba(0,200,255,.04),rgba(0,229,160,.03));border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.hiring-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start;max-width:1100px;margin:0 auto;}
+.hiring-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.3);border-radius:20px;padding:.3rem .85rem;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--lime);margin-bottom:1.3rem;}
+.hiring-h2{font-family:'Syne',sans-serif;font-size:clamp(1.4rem,3vw,2rem);font-weight:800;color:var(--white);letter-spacing:-.03em;margin-bottom:.9rem;line-height:1.2;}
+.hiring-desc{font-size:.93rem;color:var(--muted2);line-height:1.75;margin-bottom:1.3rem;}
+.hiring-email{display:inline-flex;align-items:center;gap:.45rem;color:var(--cyan);font-family:'JetBrains Mono',monospace;font-size:.82rem;text-decoration:none;border-bottom:1px solid rgba(0,200,255,.3);transition:border-color .2s;word-break:break-all;}
+.hiring-email:hover{border-color:var(--cyan);}
+.roles-list{display:flex;flex-direction:column;gap:.7rem;}
+.role-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.95rem 1.2rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all .3s;-webkit-tap-highlight-color:transparent;}
+.role-item:hover,.role-item:active{border-color:rgba(0,200,255,.3);transform:translateX(5px);}
+.role-name{font-family:'Syne',sans-serif;font-weight:600;font-size:.9rem;color:var(--white);margin-bottom:.2rem;}
+.role-tags{display:flex;gap:.35rem;flex-wrap:wrap;}
+.role-tag{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--cyan);background:var(--cyan-dim);padding:.13rem .45rem;border-radius:4px;}
+.role-arrow{color:var(--cyan);font-size:.95rem;transition:transform .25s;flex-shrink:0;}
+.role-item:hover .role-arrow{transform:translateX(4px);}
+
+/* ════════════════════════════════
+   CONTACT
+════════════════════════════════ */
+#contact{background:var(--ink);}
+.contact-grid{display:grid;grid-template-columns:1fr 1.6fr;gap:4.5rem;max-width:1100px;margin:0 auto;}
+.contact-h3{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--white);margin-bottom:1.4rem;}
+.contact-item{display:flex;gap:.85rem;margin-bottom:1.1rem;}
+.c-icon{width:36px;height:36px;min-width:36px;background:var(--cyan-dim);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.95rem;}
+.c-label{font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--cyan);letter-spacing:.09em;text-transform:uppercase;margin-bottom:.18rem;}
+.c-val{font-size:.875rem;color:var(--text);word-break:break-all;}
+.social-row{display:flex;gap:.55rem;margin-top:1.4rem;flex-wrap:wrap;}
+.s-btn{width:38px;height:38px;background:var(--surface);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.95rem;transition:all .2s;-webkit-tap-highlight-color:transparent;}
+.s-btn:hover,.s-btn:active{border-color:var(--border-bright);background:var(--cyan-dim);}
+.contact-form{display:flex;flex-direction:column;gap:.9rem;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;}
+.fgroup{display:flex;flex-direction:column;gap:.38rem;}
+.fgroup label{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--cyan);letter-spacing:.09em;text-transform:uppercase;}
+.fgroup input,.fgroup textarea,.fgroup select{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.78rem .95rem;font-family:'Space Grotesk',sans-serif;font-size:.9rem;outline:none;border-radius:var(--r);transition:border-color .2s;width:100%;-webkit-appearance:none;appearance:none;}
+.fgroup input:focus,.fgroup textarea:focus,.fgroup select:focus{border-color:var(--border-bright);}
+.fgroup input::placeholder,.fgroup textarea::placeholder{color:var(--muted);}
+.fgroup select option{background:var(--ink2);}
+.fgroup textarea{resize:vertical;min-height:100px;}
+.form-submit{background:var(--cyan);color:var(--ink);border:none;padding:.9rem;border-radius:var(--r);font-size:.9rem;font-weight:700;transition:all .25s;box-shadow:0 4px 18px rgba(0,200,255,.3);}
+.form-submit:hover,.form-submit:active{box-shadow:0 6px 28px rgba(0,200,255,.5);transform:translateY(-1px);}
+.input-error{border-color:var(--red)!important;}
+.error-msg{font-size:.7rem;color:var(--red);margin-top:.2rem;}
+
+/* ════════════════════════════════
+   FOOTER
+════════════════════════════════ */
+footer{padding:1.8rem 5%;background:var(--ink2);border-top:1px solid var(--border);}
+.footer-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.footer-logo{font-family:'Syne',sans-serif;font-size:.975rem;font-weight:800;color:var(--white);}
+.footer-logo span{color:var(--cyan);}
+.footer-links{display:flex;gap:1.3rem;flex-wrap:wrap;}
+.footer-links a{color:var(--muted);font-size:.8rem;text-decoration:none;transition:color .2s;}
+.footer-links a:hover{color:var(--text);}
+.footer-copy{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);}
+
+/* ════════════════════════════════
+   MODALS
+════════════════════════════════ */
+.modal-overlay{position:fixed;inset:0;z-index:300;background:rgba(4,8,16,.88);backdrop-filter:blur(10px);display:flex;align-items:flex-end;justify-content:center;padding:0;opacity:0;pointer-events:none;transition:opacity .3s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--ink3);border:1px solid var(--border);border-radius:16px 16px 0 0;padding:2rem 1.5rem 2.5rem;width:100%;max-width:500px;position:relative;transform:translateY(30px);transition:transform .35s cubic-bezier(.4,0,.2,1);max-height:92svh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 1.5rem;display:block;}
+.modal-close{position:absolute;top:1rem;right:1rem;background:var(--surface);border:none;width:28px;height:28px;border-radius:50%;color:var(--muted2);font-size:.78rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;}
+.modal-close:hover{background:var(--border);color:var(--white);}
+.modal-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;color:var(--white);margin-bottom:.35rem;}
+.modal-sub{font-size:.835rem;color:var(--muted2);margin-bottom:1.4rem;line-height:1.6;}
+.modal-input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.78rem .95rem;font-family:'Space Grotesk',sans-serif;font-size:.9rem;outline:none;border-radius:var(--r);transition:border-color .2s;margin-bottom:.75rem;-webkit-appearance:none;appearance:none;}
+.modal-input:focus{border-color:var(--border-bright);}
+.modal-input::placeholder{color:var(--muted);}
+.modal-submit{width:100%;background:var(--cyan);color:var(--ink);border:none;padding:.9rem;border-radius:var(--r);font-family:'Space Grotesk',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .25s;box-shadow:0 4px 18px rgba(0,200,255,.3);}
+.modal-submit:hover{box-shadow:0 6px 28px rgba(0,200,255,.5);}
+.modal-plan-badge{display:inline-block;background:var(--cyan-dim);color:var(--cyan);font-family:'JetBrains Mono',monospace;font-size:.68rem;padding:.22rem .65rem;border-radius:4px;margin-bottom:.9rem;border:1px solid rgba(0,200,255,.2);}
+.modal-plan-price{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;color:var(--white);margin-bottom:.2rem;}
+.modal-plan-sub{font-size:.74rem;color:var(--muted);margin-bottom:.9rem;font-family:'JetBrains Mono',monospace;}
+.modal-plan-feats{list-style:none;margin-bottom:1.3rem;border-top:1px solid var(--border);padding-top:.9rem;}
+.modal-plan-feats li{display:flex;align-items:center;gap:.55rem;font-size:.835rem;color:var(--muted2);padding:.38rem 0;border-bottom:1px solid var(--border);}
+.modal-plan-feats li::before{content:'✓';color:var(--cyan);flex-shrink:0;font-weight:700;}
+.modal-divider{height:1px;background:var(--border);margin:.9rem 0;}
+.role-detail-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--white);margin-bottom:.55rem;}
+.role-detail-meta{display:flex;gap:.45rem;flex-wrap:wrap;margin-bottom:.9rem;}
+.role-tag-m{font-family:'JetBrains Mono',monospace;font-size:.65rem;background:var(--cyan-dim);color:var(--cyan);padding:.18rem .55rem;border-radius:4px;}
+.role-requirements{font-size:.835rem;color:var(--muted2);line-height:1.7;margin-bottom:1.1rem;}
+.success-icon{font-size:2.8rem;margin-bottom:.9rem;text-align:center;}
+.success-title{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--white);margin-bottom:.45rem;text-align:center;}
+.success-text{font-size:.875rem;color:var(--muted2);line-height:1.65;text-align:center;}
+
+/* ════════════════════════════════
+   SCROLL REVEAL
+════════════════════════════════ */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .55s ease,transform .55s ease;}
+.reveal.in{opacity:1;transform:none;}
+
+/* ════════════════════════════════
+   ── TABLET  (≤900px)
+════════════════════════════════ */
+@media(max-width:900px){
+  /* nav */
+  .nav-links,.nav-right{display:none;}
+  .ham{display:flex;}
+
+  /* hero */
+  .hero-inner{grid-template-columns:1fr;text-align:center;gap:3rem;min-height:auto;}
+  .hero-left{max-width:100%;}
+  .hero-desc{margin-left:auto;margin-right:auto;}
+  .hero-btns{justify-content:center;}
+  .hero-stats{justify-content:center;}
+  .hero-right{order:-1;}
+  .shield-wrap{width:min(320px,80vw);height:min(320px,80vw);}
+  .shield-core{inset:60px;}
+  .shield-svg{width:80px;height:80px;}
+
+  /* about */
+  .about-grid{grid-template-columns:1fr;gap:2.5rem;}
+
+  /* services */
+  .services-grid{grid-template-columns:repeat(2,1fr);}
+
+  /* pricing */
+  .pricing-grid{grid-template-columns:1fr;max-width:420px;}
+
+  /* features */
+  .feat-grid{grid-template-columns:repeat(2,1fr);}
+
+  /* testimonials */
+  .testi-grid{grid-template-columns:1fr;}
+
+  /* hiring */
+  .hiring-grid{grid-template-columns:1fr;gap:2rem;}
+
+  /* contact */
+  .contact-grid{grid-template-columns:1fr;gap:2.5rem;}
+
+  /* footer */
+  .footer-inner{flex-direction:column;align-items:flex-start;gap:.75rem;}
+
+  /* modal: sheet on mobile */
+  .modal-overlay{align-items:flex-end;}
+}
+
+/* ════════════════════════════════
+   ── MOBILE  (≤600px)
+════════════════════════════════ */
+@media(max-width:600px){
+  :root{--nav-h:60px;}
+  .section-wrap{padding:4rem 4%;}
+  .section-head{margin-bottom:2.5rem;}
+
+  /* hero */
+  #hero{padding:calc(var(--nav-h) + 2.5rem) 4% 3rem;}
+  .hero-eyebrow{font-size:.65rem;}
+  .hero-stats{gap:1.5rem;}
+  .stat-num{font-size:1.5rem;}
+  .threat-badge{font-size:.6rem;padding:.38rem .65rem;}
+
+  /* trust */
+  .trust-strip{padding:1rem 4%;}
+  .trust-inner{gap:.8rem;}
+  .trust-scroll{gap:1rem;}
+  .trust-item{font-size:.75rem;}
+
+  /* services */
+  .services-grid{grid-template-columns:1fr;}
+
+  /* features */
+  .feat-grid{grid-template-columns:1fr;}
+
+  /* pricing */
+  .pricing-grid{max-width:100%;}
+
+  /* form rows go single col */
+  .form-row{grid-template-columns:1fr;}
+
+  /* modal full width */
+  .modal{border-radius:14px 14px 0 0;padding:1.8rem 1.2rem 2.2rem;}
+
+  /* footer */
+  .footer-inner{gap:.6rem;}
+  .footer-links{gap:.8rem;}
+}
+
+/* ════════════════════════════════
+   ── SMALL PHONES  (≤380px)
+════════════════════════════════ */
+@media(max-width:380px){
+  .hero-btns{flex-direction:column;}
+  .btn-primary,.btn-outline{width:100%;text-align:center;}
+  .hero-stats{flex-direction:column;gap:1rem;align-items:center;}
+}
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div id="cur"></div>
+<div id="curR"></div>
+
+<!-- BG -->
+<div class="bg-grid"></div>
+<div class="bg-g1"></div>
+<div class="bg-g2"></div>
+
+<!-- ══════════════ MODALS ══════════════ -->
+<div class="modal-overlay" id="modal-getstarted">
+  <div class="modal">
+    <span class="modal-handle"></span>
+    <button class="modal-close" data-close="modal-getstarted">✕</button>
+    <div class="modal-title">Get Started</div>
+    <div class="modal-sub">Tell us about your business and we'll tailor the right protection.</div>
+    <input class="modal-input" id="gs-name" placeholder="Full Name" />
+    <input class="modal-input" id="gs-email" type="email" placeholder="Work Email" />
+    <input class="modal-input" id="gs-company" placeholder="Company Name" />
+    <select class="modal-input" id="gs-size">
+      <option value="">Company Size…</option>
+      <option>1–10 employees</option>
+      <option>11–50 employees</option>
+      <option>51–200 employees</option>
+      <option>200+ employees</option>
+    </select>
+    <button class="modal-submit" onclick="submitModal('modal-getstarted',['gs-name','gs-email'])">ACTIVATE PROTECTION →</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-demo">
+  <div class="modal">
+    <span class="modal-handle"></span>
+    <button class="modal-close" data-close="modal-demo">✕</button>
+    <div class="modal-title">Book a Live Demo</div>
+    <div class="modal-sub">See ShieldNova AI defend against real threats in real time.</div>
+    <input class="modal-input" id="d-name" placeholder="Full Name" />
+    <input class="modal-input" id="d-email" type="email" placeholder="Work Email" />
+    <input class="modal-input" id="d-company" placeholder="Company Name" />
+    <select class="modal-input">
+      <option value="">Preferred time slot…</option>
+      <option>Morning (9AM–12PM IST)</option>
+      <option>Afternoon (12PM–5PM IST)</option>
+      <option>Evening (5PM–8PM IST)</option>
+    </select>
+    <button class="modal-submit" onclick="submitModal('modal-demo',['d-name','d-email'])">BOOK DEMO →</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-plan">
+  <div class="modal">
+    <span class="modal-handle"></span>
+    <button class="modal-close" data-close="modal-plan">✕</button>
+    <div class="modal-plan-badge" id="plan-badge">PLAN</div>
+    <div class="modal-plan-price" id="plan-price-detail">₹999</div>
+    <div class="modal-plan-sub" id="plan-price-sub">/month + 12% GST</div>
+    <ul class="modal-plan-feats" id="plan-features-list"></ul>
+    <div class="modal-divider"></div>
+    <div class="modal-sub">Enter your details to activate this plan.</div>
+    <input class="modal-input" id="plan-name" placeholder="Full Name" />
+    <input class="modal-input" id="plan-email" type="email" placeholder="Work Email" />
+    <input class="modal-input" id="plan-company" placeholder="Company" />
+    <button class="modal-submit" onclick="submitModal('modal-plan',['plan-name','plan-email'])">SUBSCRIBE NOW →</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-sales">
+  <div class="modal">
+    <span class="modal-handle"></span>
+    <button class="modal-close" data-close="modal-sales">✕</button>
+    <div class="modal-title">Talk to Sales</div>
+    <div class="modal-sub">Our enterprise team will contact you within 2 business hours.</div>
+    <input class="modal-input" id="sl-name" placeholder="Full Name" />
+    <input class="modal-input" id="sl-email" type="email" placeholder="Work Email" />
+    <input class="modal-input" id="sl-company" placeholder="Company" />
+    <input class="modal-input" id="sl-phone" type="tel" placeholder="Phone Number" />
+    <button class="modal-submit" onclick="submitModal('modal-sales',['sl-name','sl-email'])">REQUEST A CALL →</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-apply">
+  <div class="modal">
+    <span class="modal-handle"></span>
+    <button class="modal-close" data-close="modal-apply">✕</button>
+    <div class="modal-title">Apply for Role</div>
+    <div class="role-detail-title" id="apply-role-title"></div>
+    <div class="role-detail-meta" id="apply-role-meta"></div>
+    <div class="role-requirements" id="apply-role-desc"></div>
+    <input class="modal-input" id="apply-name" placeholder="Full Name" />
+    <input class="modal-input" id="apply-email" type="email" placeholder="Email Address" />
+    <input class="modal-input" id="apply-linkedin" placeholder="LinkedIn / Portfolio URL" />
+    <textarea class="modal-input" rows="3" id="apply-why" placeholder="Why do you want to join ShieldNova AI?"></textarea>
+    <button class="modal-submit" onclick="submitModal('modal-apply',['apply-name','apply-email'])">SUBMIT APPLICATION →</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-success">
+  <div class="modal" style="text-align:center;padding:2.5rem 1.5rem 3rem;">
+    <span class="modal-handle"></span>
+    <button class="modal-close" data-close="modal-success">✕</button>
+    <div class="success-icon">🛡️</div>
+    <div class="success-title" id="success-title">Done!</div>
+    <p class="success-text" id="success-msg">We'll be in touch shortly.</p>
+  </div>
+</div>
+
+<!-- ══════════════ NAV ══════════════ -->
+<nav id="main-nav">
+  <a href="#" class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6L12 2z"/>
+      </svg>
+    </div>
+    <span class="logo-name">Shield<span>Nova</span> AI</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#hiring">Careers</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="btn-ghost" onclick="openModal('modal-demo')">Book Demo</button>
+    <button class="btn-nav" onclick="openModal('modal-getstarted')">Get Started</button>
+  </div>
+  <button class="ham" id="ham-btn" onclick="toggleDrawer()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile Drawer -->
+<div class="nav-drawer" id="nav-drawer">
+  <a href="#about" onclick="closeDrawer()">About</a>
+  <a href="#services" onclick="closeDrawer()">Services</a>
+  <a href="#pricing" onclick="closeDrawer()">Pricing</a>
+  <a href="#faq" onclick="closeDrawer()">FAQ</a>
+  <a href="#hiring" onclick="closeDrawer()">Careers</a>
+  <a href="#contact" onclick="closeDrawer()">Contact</a>
+  <div class="drawer-btns">
+    <button class="btn-ghost" onclick="closeDrawer();openModal('modal-demo')">Book Demo</button>
+    <button class="btn-nav" onclick="closeDrawer();openModal('modal-getstarted')">Get Started</button>
+  </div>
+</div>
+
+<!-- ══════════════ HERO ══════════════ -->
+<section id="hero">
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-eyebrow"><span class="eyebrow-dot"></span>AI-Powered Security Platform</div>
+      <h1 class="hero-h1">Smart <span class="c">AI Protection</span> for <span class="g">Modern Business</span></h1>
+      <p class="hero-desc">Real-time threat detection, automated response, and 24/7 SOC monitoring — powered by AI trained on billions of signals. Enterprise security at startup speed.</p>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="openModal('modal-getstarted')">Get Protected →</button>
+        <button class="btn-outline" onclick="openModal('modal-demo')">Watch Demo</button>
+      </div>
+      <div class="hero-stats">
+        <div><div class="stat-num">99.9<span>%</span></div><div class="stat-lbl">Threat Detection</div></div>
+        <div><div class="stat-num">24<span>/7</span></div><div class="stat-lbl">SOC Monitoring</div></div>
+        <div><div class="stat-num">500<span>+</span></div><div class="stat-lbl">Businesses Secured</div></div>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="shield-wrap">
+        <div class="shield-ring ring1"></div>
+        <div class="shield-ring ring2"></div>
+        <div class="shield-ring ring3"></div>
+        <div class="shield-core">
+          <svg class="shield-svg" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="sg" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#00c8ff"/>
+                <stop offset="100%" stop-color="#00e5a0"/>
+              </linearGradient>
+            </defs>
+            <path d="M40 5L10 18v22c0 18 12.5 34.5 30 38C57.5 74.5 70 58 70 40V18L40 5Z" fill="url(#sg)" opacity=".15"/>
+            <path d="M40 5L10 18v22c0 18 12.5 34.5 30 38C57.5 74.5 70 58 70 40V18L40 5Z" stroke="url(#sg)" stroke-width="2" fill="none"/>
+            <path d="M28 40l8 8 16-16" stroke="url(#sg)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="threat-badge tb1"><span class="tb-dot"></span>Phishing Blocked</div>
+        <div class="threat-badge tb2"><span class="tb-dot"></span>Scanning Active</div>
+        <div class="threat-badge tb3"><span class="tb-dot"></span>Zero Threats</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST -->
+<div class="trust-strip">
+  <div class="trust-inner">
+    <div class="trust-label">Trusted by</div>
+    <div class="trust-scroll">
+      <div class="trust-item"><span class="t-dot"></span>FinSecure Solutions</div>
+      <div class="trust-item"><span class="t-dot"></span>CloudBridge Startup</div>
+      <div class="trust-item"><span class="t-dot"></span>RetailMax India</div>
+      <div class="trust-item"><span class="t-dot"></span>HealthSync Corp</div>
+      <div class="trust-item"><span class="t-dot"></span>TechVault Systems</div>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow-tag">About Us</span>
+      <h2 class="section-h2">Who Is <span class="c">ShieldNova AI?</span></h2>
+    </div>
+    <div class="about-grid">
+      <div class="about-text reveal">
+        <p>ShieldNova AI is a next-generation cybersecurity company leveraging artificial intelligence to protect modern businesses from evolving digital threats. We combine real-time AI monitoring, behavioral analytics, and automated response to deliver enterprise-grade security at startup speed.</p>
+        <p>From SMEs to large enterprises, we provide tailored threat intelligence, SIEM monitoring, phishing prevention, and security automation — all through an intuitive control center.</p>
+        <div class="founder-card">
+          <div class="founder-avatar">M</div>
+          <div>
+            <div class="founder-name">Mohan</div>
+            <div class="founder-role">Founder & Cybersecurity Researcher</div>
+            <div class="founder-quote">"Building intelligent cybersecurity solutions for the future."</div>
+          </div>
+        </div>
+      </div>
+      <div class="about-metrics reveal">
+        <div class="metric-card"><div class="metric-icon">🤖</div><div class="metric-num">10<span>B+</span></div><div class="metric-label">Threat Signals Analyzed</div></div>
+        <div class="metric-card"><div class="metric-icon">⚡</div><div class="metric-num">&lt;<span>3s</span></div><div class="metric-label">Mean Detection Time</div></div>
+        <div class="metric-card"><div class="metric-icon">🛡️</div><div class="metric-num">99.9<span>%</span></div><div class="metric-label">Uptime SLA</div></div>
+        <div class="metric-card"><div class="metric-icon">🌐</div><div class="metric-num">45<span>+</span></div><div class="metric-label">Countries Covered</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow-tag">Services</span>
+      <h2 class="section-h2">AI-Driven <span class="c">Security Services</span></h2>
+      <p class="section-sub">A full-stack security suite powered by machine learning — from prevention to recovery.</p>
+    </div>
+    <div class="services-grid">
+      <div class="svc-card reveal"><div class="svc-icon-wrap">🤖</div><div class="svc-name">AI Threat Detection</div><div class="svc-desc">ML models continuously analyze network behavior to identify and neutralize zero-day threats in real time.</div></div>
+      <div class="svc-card reveal"><div class="svc-icon-wrap">🎣</div><div class="svc-name">Phishing Protection</div><div class="svc-desc">Advanced NLP-based email and URL analysis blocks sophisticated phishing campaigns before they reach your team.</div></div>
+      <div class="svc-card reveal"><div class="svc-icon-wrap">📊</div><div class="svc-name">SIEM Monitoring</div><div class="svc-desc">Centralized security event management with AI correlation for instant anomaly detection and alerting.</div></div>
+      <div class="svc-card reveal"><div class="svc-icon-wrap">🦠</div><div class="svc-name">Malware Detection</div><div class="svc-desc">Deep behavioral scanning and sandboxing technology identifies and quarantines malware before execution.</div></div>
+      <div class="svc-card reveal"><div class="svc-icon-wrap">🏢</div><div class="svc-name">SOC Monitoring</div><div class="svc-desc">Fully managed 24/7 Security Operations Center with expert analysts and AI working in tandem.</div></div>
+      <div class="svc-card reveal"><div class="svc-icon-wrap">⚙️</div><div class="svc-name">Security Automation</div><div class="svc-desc">SOAR-powered playbooks automate incident workflows, cutting response time from hours to seconds.</div></div>
+      <div class="svc-card reveal"><div class="svc-icon-wrap">🚨</div><div class="svc-name">Incident Response</div><div class="svc-desc">Rapid containment, forensic investigation, and remediation by our dedicated incident response team.</div></div>
+      <div class="svc-card reveal"><div class="svc-icon-wrap">🌐</div><div class="svc-name">Threat Intelligence</div><div class="svc-desc">Global feeds and dark web monitoring keep you ahead of emerging attack vectors and adversary TTPs.</div></div>
+      <div class="svc-card reveal"><div class="svc-icon-wrap">🔍</div><div class="svc-name">Vulnerability Assessment</div><div class="svc-desc">Continuous scanning and prioritized patching recommendations to close security gaps before exploitation.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="section-wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow-tag">Pricing</span>
+      <h2 class="section-h2">Transparent <span class="c">Security Plans</span></h2>
+      <p class="section-sub">No hidden fees. No lock-in. Cancel anytime. All prices exclusive of 12% GST.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card reveal">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">₹999<sub>/mo</sub></div>
+        <div class="plan-gst">+ 12% GST → ₹1,118.88/mo</div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li>AI Threat Detection (Basic)</li><li>Phishing Protection</li><li>Email Alerts</li>
+          <li>Weekly Reports</li><li>5 Users</li><li>Email Support</li>
+        </ul>
+        <button class="plan-btn" onclick="openPlanModal('Starter','₹999','/month + 12% GST',['AI Threat Detection (Basic)','Phishing Protection','Email Alerts','Weekly Reports','5 Users','Email Support'])">Get Started</button>
+      </div>
+      <div class="price-card hot reveal">
+        <div class="hot-tag">MOST POPULAR</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">₹2,999<sub>/mo</sub></div>
+        <div class="plan-gst">+ 12% GST → ₹3,358.88/mo</div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li>All Starter Features</li><li>SIEM Monitoring</li><li>Malware Detection</li>
+          <li>WhatsApp + Email Alerts</li><li>Dashboard Analytics</li><li>25 Users</li><li>Priority Support</li>
+        </ul>
+        <button class="plan-btn" onclick="openPlanModal('Pro','₹2,999','/month + 12% GST',['All Starter Features','SIEM Monitoring','Malware Detection','WhatsApp + Email Alerts','Dashboard Analytics','25 Users','Priority Support'])">Get Started</button>
+      </div>
+      <div class="price-card reveal">
+        <div class="plan-name">Business</div>
+        <div class="plan-price">₹9,999<sub>/mo</sub></div>
+        <div class="plan-gst">+ 12% GST → ₹11,198.88/mo</div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li>All Pro Features</li><li>SOC Monitoring 24/7</li><li>Incident Response</li>
+          <li>Security Automation</li><li>Threat Intelligence</li><li>Unlimited Users</li><li>Dedicated Account Manager</li>
+        </ul>
+        <button class="plan-btn" onclick="openModal('modal-sales')">Contact Sales</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow-tag">Features</span>
+      <h2 class="section-h2">Everything You Need to Stay <span class="c">Secure</span></h2>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-item reveal"><div class="feat-icon">⚡</div><div><div class="feat-name">Real-Time Alerts</div><div class="feat-desc">Instant notifications the moment a threat is detected — zero delay between detection and action.</div></div></div>
+      <div class="feat-item reveal"><div class="feat-icon">🤖</div><div><div class="feat-name">AI-Powered Monitoring</div><div class="feat-desc">Autonomous AI models trained on billions of threat signals continuously watch your environment.</div></div></div>
+      <div class="feat-item reveal"><div class="feat-icon">📈</div><div><div class="feat-name">Dashboard Analytics</div><div class="feat-desc">Intuitive, real-time dashboards showing threat landscape, risk scores, and security posture.</div></div></div>
+      <div class="feat-item reveal"><div class="feat-icon">💬</div><div><div class="feat-name">WhatsApp & Email Alerts</div><div class="feat-desc">Multi-channel notifications keep your team in the loop wherever they are.</div></div></div>
+      <div class="feat-item reveal"><div class="feat-icon">🕐</div><div><div class="feat-name">24/7 Monitoring</div><div class="feat-desc">Around-the-clock surveillance — our AI never sleeps, catching threats at any hour.</div></div></div>
+      <div class="feat-item reveal"><div class="feat-icon">🌐</div><div><div class="feat-name">Threat Intelligence</div><div class="feat-desc">Global threat feeds and IOC databases keep your defenses ahead of emerging campaigns.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="section-wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow-tag">FAQ</span>
+      <h2 class="section-h2">Frequently Asked <span class="c">Questions</span></h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">What makes ShieldNova AI different from traditional antivirus?<span class="faq-toggle">+</span></div><div class="faq-a"><p>Traditional antivirus relies on known threat signatures. ShieldNova AI uses machine learning and behavioral analytics to detect unknown, zero-day threats in real time — catching attacks signature-based tools miss entirely.</p></div></div>
+      <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">How long does setup take?<span class="faq-toggle">+</span></div><div class="faq-a"><p>Most businesses are fully operational within 24–48 hours. Our onboarding team handles the integration and configuration — no deep technical expertise required on your end.</p></div></div>
+      <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">Is my data safe and private?<span class="faq-toggle">+</span></div><div class="faq-a"><p>Absolutely. We use AES-256 encryption at rest and TLS 1.3 in transit. All data is processed within compliant, region-locked infrastructure. We never sell or share your data with third parties.</p></div></div>
+      <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">Do you support small businesses and startups?<span class="faq-toggle">+</span></div><div class="faq-a"><p>Yes — our Starter plan is purpose-built for small teams. Cybersecurity shouldn't be a luxury. We've priced our plans to make enterprise-grade protection accessible at every stage of growth.</p></div></div>
+      <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">Can I upgrade or downgrade my plan anytime?<span class="faq-toggle">+</span></div><div class="faq-a"><p>Yes. Plans are billed monthly with no lock-in. You can upgrade instantly and downgrade at the end of your billing cycle. Our team will guide you through any changes.</p></div></div>
+      <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">What compliance standards do you support?<span class="faq-toggle">+</span></div><div class="faq-a"><p>We align with ISO 27001, SOC 2 Type II, GDPR, and India's IT Act. Our Business plan includes compliance reporting to help your audit and regulatory needs.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="section-wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow-tag">Testimonials</span>
+      <h2 class="section-h2">Trusted by <span class="c">Security-First Teams</span></h2>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card reveal">
+        <div class="testi-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+        <p class="testi-text">ShieldNova's AI caught a supply-chain attack our legacy SIEM completely missed. The real-time WhatsApp alert saved us from a potential data breach.</p>
+        <div class="testi-author"><div class="testi-avatar">RK</div><div><div class="testi-name">Ravi Kumar</div><div class="testi-co">CISO · RetailMax India</div></div></div>
+      </div>
+      <div class="testi-card reveal">
+        <div class="testi-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+        <p class="testi-text">The phishing protection has been a game-changer. Spear-phishing incidents dropped by 95% in our first month. Our team finally feels secure.</p>
+        <div class="testi-author"><div class="testi-avatar">PA</div><div><div class="testi-name">Priya Anand</div><div class="testi-co">CTO · FinSecure Solutions</div></div></div>
+      </div>
+      <div class="testi-card reveal">
+        <div class="testi-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+        <p class="testi-text">Outstanding SOC team and dashboard. We went from zero visibility to full threat awareness across 200+ endpoints in under 48 hours.</p>
+        <div class="testi-author"><div class="testi-avatar">AM</div><div><div class="testi-name">Arjun Mehta</div><div class="testi-co">CEO · CloudBridge Startup</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HIRING -->
+<section id="hiring">
+  <div class="section-wrap">
+    <div class="hiring-grid">
+      <div class="reveal">
+        <div class="hiring-badge">🟢 We're Hiring</div>
+        <h2 class="hiring-h2">Join the Future of Cybersecurity</h2>
+        <p class="hiring-desc">We're a remote-first team of AI researchers, security engineers, and product builders on a mission to make every business safe. Come build with us.</p>
+        <a href="mailto:careersshieldnova.security@gmail.com" class="hiring-email">📧 careersshieldnova.security@gmail.com</a>
+      </div>
+      <div class="roles-list reveal">
+        <div class="role-item" onclick="openRoleModal('AI/ML Security Engineer','Full-time · Remote','India / Remote','Build and train ML models on threat data. 2+ years in ML, Python, PyTorch or TF required.')">
+          <div><div class="role-name">AI/ML Security Engineer</div><div class="role-tags"><span class="role-tag">Full-time</span><span class="role-tag">Remote</span></div></div>
+          <span class="role-arrow">→</span>
+        </div>
+        <div class="role-item" onclick="openRoleModal('Cybersecurity Analyst','Full-time · Remote','India / Remote','Analyze threats, triage incidents, and improve detection rules. CEH/OSCP preferred.')">
+          <div><div class="role-name">Cybersecurity Analyst</div><div class="role-tags"><span class="role-tag">Full-time</span><span class="role-tag">Remote</span></div></div>
+          <span class="role-arrow">→</span>
+        </div>
+        <div class="role-item" onclick="openRoleModal('Frontend Developer','Full-time · Remote','India / Remote','Build our client-facing dashboard and product UI. React, TypeScript, Figma-to-code skills needed.')">
+          <div><div class="role-name">Frontend Developer</div><div class="role-tags"><span class="role-tag">Full-time</span><span class="role-tag">Remote</span></div></div>
+          <span class="role-arrow">→</span>
+        </div>
+        <div class="role-item" onclick="openRoleModal('Cybersecurity Intern','Internship · Remote','India / Remote','3–6 month internship. Learn threat analysis, tooling, and AI-driven security practices.')">
+          <div><div class="role-name">Cybersecurity Intern</div><div class="role-tags"><span class="role-tag">Internship</span><span class="role-tag">Remote</span></div></div>
+          <span class="role-arrow">→</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow-tag">Contact</span>
+      <h2 class="section-h2">Let's Secure Your <span class="c">Business</span></h2>
+    </div>
+    <div class="contact-grid">
+      <div class="reveal">
+        <h3 class="contact-h3">Get In Touch</h3>
+        <div class="contact-item"><div class="c-icon">📧</div><div><div class="c-label">General</div><div class="c-val">shieldnova.security@gmail.com</div></div></div>
+        <div class="contact-item"><div class="c-icon">💼</div><div><div class="c-label">Careers</div><div class="c-val">careersshieldnova.security@gmail.com</div></div></div>
+        <div class="contact-item"><div class="c-icon">📍</div><div><div class="c-label">Location</div><div class="c-val">India — Remote First</div></div></div>
+        <div class="social-row">
+          <div class="s-btn" title="LinkedIn">💼</div>
+          <div class="s-btn" title="Twitter">🐦</div>
+          <div class="s-btn" title="GitHub">💻</div>
+          <div class="s-btn" title="Telegram">✈️</div>
+          <div class="s-btn" title="WhatsApp">📱</div>
+        </div>
+      </div>
+      <div class="contact-form reveal">
+        <div class="form-row">
+          <div class="fgroup"><label>Full Name</label><input id="cf-name" type="text" placeholder="John Doe"></div>
+          <div class="fgroup"><label>Company</label><input id="cf-company" type="text" placeholder="Your Company"></div>
+        </div>
+        <div class="form-row">
+          <div class="fgroup"><label>Email</label><input id="cf-email" type="email" placeholder="john@company.com"></div>
+          <div class="fgroup"><label>Phone</label><input id="cf-phone" type="tel" placeholder="+91 98765 43210"></div>
+        </div>
+        <div class="fgroup">
+          <label>Service Interested In</label>
+          <select id="cf-service">
+            <option value="">Select a service…</option>
+            <option>AI Threat Detection</option>
+            <option>Phishing Protection</option>
+            <option>SIEM Monitoring</option>
+            <option>SOC Monitoring</option>
+            <option>Security Automation</option>
+            <option>Incident Response</option>
+          </select>
+        </div>
+        <div class="fgroup"><label>Message</label><textarea id="cf-message" rows="4" placeholder="Tell us about your security needs…"></textarea></div>
+        <button class="form-submit" id="contact-submit-btn" onclick="submitContactForm()">Send Message →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">Shield<span>Nova</span> AI</div>
+    <div class="footer-links">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div class="footer-copy">© 2026 ShieldNova AI · All rights reserved</div>
+  </div>
+</footer>
+
+<script>
+/* ── CURSOR (desktop only) ── */
+const cur=document.getElementById('cur'),curR=document.getElementById('curR');
+let mx=0,my=0,rx=0,ry=0;
+if(window.matchMedia('(pointer:fine)').matches){
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+  (function loop(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;curR.style.left=rx+'px';curR.style.top=ry+'px';requestAnimationFrame(loop);})();
+  document.querySelectorAll('button,a,.role-item,.price-card,.svc-card,.testi-card,.feat-item').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{cur.style.width='14px';cur.style.height='14px';curR.style.width='42px';curR.style.height='42px';});
+    el.addEventListener('mouseleave',()=>{cur.style.width='8px';cur.style.height='8px';curR.style.width='32px';curR.style.height='32px';});
+  });
+}
+
+/* ── NAV ── */
+window.addEventListener('scroll',()=>{
+  document.getElementById('main-nav').classList.toggle('solid',window.scrollY>50);
+});
+
+/* ── HAMBURGER ── */
+let drawerOpen=false;
+function toggleDrawer(){drawerOpen=!drawerOpen;document.getElementById('nav-drawer').classList.toggle('open',drawerOpen);document.getElementById('ham-btn').classList.toggle('open',drawerOpen);}
+function closeDrawer(){drawerOpen=false;document.getElementById('nav-drawer').classList.remove('open');document.getElementById('ham-btn').classList.remove('open');}
+/* close drawer on outside click */
+document.addEventListener('click',e=>{
+  const drawer=document.getElementById('nav-drawer'),btn=document.getElementById('ham-btn');
+  if(drawerOpen&&!drawer.contains(e.target)&&!btn.contains(e.target))closeDrawer();
+});
+
+/* ── FAQ ── */
+function toggleFaq(el){
+  const item=el.parentElement,open=item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+  if(!open)item.classList.add('open');
+}
+
+/* ── SCROLL REVEAL ── */
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');});
+},{threshold:.07});
+document.querySelectorAll('.reveal').forEach((el,i)=>{
+  el.style.transitionDelay=(i%4)*.06+'s';
+  obs.observe(el);
+});
+
+/* ── MODALS ── */
+function openModal(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';closeDrawer();}
+function closeModal(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';}
+document.querySelectorAll('[data-close]').forEach(btn=>btn.addEventListener('click',()=>closeModal(btn.dataset.close)));
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id);}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-overlay.open').forEach(m=>closeModal(m.id));});
+
+/* ── VALIDATION ── */
+function validate(ids){
+  let ok=true;
+  ids.forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.classList.remove('input-error');
+    const n=el.nextElementSibling;if(n&&n.classList.contains('error-msg'))n.remove();
+    const v=el.value.trim();let err='';
+    if(!v)err='Required.';
+    else if(el.type==='email'&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v))err='Invalid email.';
+    if(err){el.classList.add('input-error');const m=document.createElement('span');m.className='error-msg';m.textContent=err;el.after(m);ok=false;}
+  });
+  return ok;
+}
+
+function showSuccess(title,msg){
+  document.getElementById('success-title').textContent=title;
+  document.getElementById('success-msg').textContent=msg;
+  openModal('modal-success');
+}
+
+function submitModal(modalId,reqIds){
+  if(!validate(reqIds))return;
+  closeModal(modalId);
+  setTimeout(()=>{
+    const msgs={
+      'modal-getstarted':['Protection Activated! 🛡️','Our team will contact you within 24 hours to complete onboarding.'],
+      'modal-demo':['Demo Booked! 📅','Check your email for the calendar invite and session link.'],
+      'modal-plan':['Subscription Initiated! ✅','Welcome aboard! Our team will help complete your setup.'],
+      'modal-sales':['Sales Team Notified! 💼','Our enterprise team will call you within 2 business hours.'],
+      'modal-apply':['Application Submitted! 🚀','We review applications within 5 business days and will reach out via email.'],
+    };
+    const[t,m]=msgs[modalId]||['Done!','We\'ll be in touch soon.'];
+    showSuccess(t,m);
+  },200);
+}
+
+function openPlanModal(name,price,sub,features){
+  document.getElementById('plan-badge').textContent=name.toUpperCase();
+  document.getElementById('plan-price-detail').textContent=price;
+  document.getElementById('plan-price-sub').textContent=sub;
+  document.getElementById('plan-features-list').innerHTML=features.map(f=>`<li>${f}</li>`).join('');
+  ['plan-name','plan-email','plan-company'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.classList.remove('input-error');}});
+  openModal('modal-plan');
+}
+
+function openRoleModal(title,type,location,desc){
+  document.getElementById('apply-role-title').textContent=title;
+  document.getElementById('apply-role-meta').innerHTML=`<span class="role-tag-m">${type}</span><span class="role-tag-m">${location}</span>`;
+  document.getElementById('apply-role-desc').textContent=desc;
+  ['apply-name','apply-email','apply-linkedin','apply-why'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.classList.remove('input-error');}});
+  openModal('modal-apply');
+}
+
+/* ── CONTACT FORM ── */
+function submitContactForm(){
+  if(!validate(['cf-name','cf-email']))return;
+  const btn=document.getElementById('contact-submit-btn');
+  btn.textContent='Sending…';btn.disabled=true;
+  setTimeout(()=>{
+    btn.textContent='✓ Message Sent';
+    btn.style.background='linear-gradient(90deg,var(--lime),var(--cyan))';
+    ['cf-name','cf-company','cf-email','cf-phone','cf-message'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    setTimeout(()=>{btn.textContent='Send Message →';btn.style.background='';btn.disabled=false;},4000);
+  },1200);
+}
+</script>
+</body>
+</html>
